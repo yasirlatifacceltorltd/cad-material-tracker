@@ -34,6 +34,7 @@ from app.services.ai_service import (
 )
 from app.services.ocr_service import ocr_image
 from app.services.cleanup_service import cleanup_temp_files, cleanup_job_resources
+from app.services.storage_service import upload_result_csv
 
 
 def render_page_to_image(page, page_num: int, use_pymupdf: bool = True) -> Tuple[Image.Image, int]:
@@ -985,6 +986,31 @@ async def process_pdf_with_job(job: JobState):
                         r.get("confidence", "")
                     ])
             
+            # Save a permanent copy in Supabase Storage.
+            # A cloud upload failure should not fail the completed extraction job.
+            try:
+                cloud_path = await asyncio.to_thread(
+                    upload_result_csv,
+                    csv_path,
+                    str(job.job_id),
+                )
+                print(f"[JOB-{job.job_id}] Cloud result saved: {cloud_path}")
+                await job.broadcast({
+                    "type": "log",
+                    "level": "success",
+                    "message": "Results saved to cloud storage"
+                })
+            except Exception as cloud_error:
+                print(
+                    f"[JOB-{job.job_id}] Cloud upload WARNING: "
+                    f"{type(cloud_error).__name__}: {cloud_error}"
+                )
+                await job.broadcast({
+                    "type": "log",
+                    "level": "warning",
+                    "message": "Results generated successfully, but cloud backup failed"
+                })
+
             # Job completed
             job.status = JobStatus.COMPLETED
             job.completed_at = datetime.now()

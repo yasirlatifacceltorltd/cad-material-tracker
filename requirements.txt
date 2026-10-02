@@ -97,3 +97,5 @@ psycopg2-binary
 python-jose[cryptography]
 passlib[bcrypt]
 pydantic[email]
+supabase==2.31.0
+
