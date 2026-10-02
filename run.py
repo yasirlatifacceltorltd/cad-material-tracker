@@ -16,7 +16,7 @@ if __name__ == "__main__":
     # Note: Scheduler starts automatically in FastAPI startup event
     uvicorn.run(
         "app.main:app",  # String import path (required for --reload)
-        host="0.0.0.0", 
+        host="127.0.0.1", 
         port=8000,
         ws="websockets-sansio",  # Sans-IO impl: no server-side keepalive pings
         ws_ping_interval=None,   # Belt-and-suspenders: disable pings if ever read
