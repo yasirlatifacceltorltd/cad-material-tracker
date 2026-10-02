@@ -93,7 +93,7 @@ pymupdf
 # Auth / database
 SQLAlchemy
 alembic
-psycopg2-binary
+psycopg[binary]
 python-jose[cryptography]
 passlib[bcrypt]
 pydantic[email]
